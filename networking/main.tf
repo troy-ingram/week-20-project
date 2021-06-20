@@ -44,6 +44,12 @@ resource "aws_subnet" "project_private_subnet" {
   }
 }
 
+resource "aws_route_table_association" "project_private_assoc" {
+  count          = length(var.private_cidrs)
+  subnet_id      = aws_subnet.project_private_subnet.*.id[count.index]
+  route_table_id = aws_route_table.project_private_rt.id
+}
+
 resource "aws_internet_gateway" "project_internet_gateway" {
   vpc_id = aws_vpc.project_vpc.id
 
@@ -55,6 +61,15 @@ resource "aws_internet_gateway" "project_internet_gateway" {
   }
 }
 
+resource "aws_eip" "project_eip" {
+
+}
+
+resource "aws_nat_gateway" "project_natgateway" {
+  allocation_id = aws_eip.project_eip.id
+  subnet_id     = aws_subnet.project_public_subnet[1].id
+}
+
 resource "aws_route_table" "project_public_rt" {
   vpc_id = aws_vpc.project_vpc.id
 
@@ -63,10 +78,24 @@ resource "aws_route_table" "project_public_rt" {
   }
 }
 
-resource "aws_route" "default_route" {
+resource "aws_route" "default_public_route" {
   route_table_id         = aws_route_table.project_public_rt.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.project_internet_gateway.id
+}
+
+resource "aws_route_table" "project_private_rt" {
+  vpc_id = aws_vpc.project_vpc.id
+
+  tags = {
+    Name = "project_private"
+  }
+}
+
+resource "aws_route" "default_private_route" {
+  route_table_id         = aws_route_table.project_private_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.project_natgateway.id
 }
 
 resource "aws_default_route_table" "project_private_rt" {
@@ -107,6 +136,40 @@ resource "aws_security_group" "project_private_sg" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.project_public_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.project_web_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "project_web_sg" {
+  name        = "project_web_sg"
+  description = "Allow all inbound HTTP traffic"
+  vpc_id      = aws_vpc.project_vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   egress {

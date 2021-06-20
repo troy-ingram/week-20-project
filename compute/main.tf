@@ -22,9 +22,10 @@ resource "aws_launch_template" "project_bastion" {
   instance_type          = var.bastion_instance_type
   vpc_security_group_ids = [var.public_sg]
   key_name               = var.key_name
-  
+  user_data = filebase64("./compute/install_apache.sh")
+
   tags = {
-      Name = "project_bastion"
+    Name = "project_bastion"
   }
 }
 
@@ -47,9 +48,9 @@ resource "aws_launch_template" "project_database" {
   instance_type          = var.database_instance_type
   vpc_security_group_ids = [var.private_sg]
   key_name               = var.key_name
-  
+
   tags = {
-      Name = "project_database"
+    Name = "project_database"
   }
 }
 
@@ -64,4 +65,10 @@ resource "aws_autoscaling_group" "project_database" {
     id      = aws_launch_template.project_database.id
     version = "$Latest"
   }
+}
+
+resource "aws_autoscaling_attachment" "asg_attachment_bar" {
+  autoscaling_group_name = aws_autoscaling_group.project_database.id
+  # elb                    = var.elb
+  alb_target_group_arn = var.alb_tg
 }

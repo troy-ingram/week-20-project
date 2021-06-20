@@ -12,6 +12,10 @@ output "private_sg" {
   value = aws_security_group.project_private_sg.id
 }
 
+output "web_sg" {
+  value = aws_security_group.project_web_sg.id
+}
+
 output "private_subnet" {
   value = aws_subnet.project_private_subnet[*].id
 }

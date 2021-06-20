@@ -14,5 +14,14 @@ module "compute" {
   private_sg     = module.networking.private_sg
   private_subnet = module.networking.private_subnet
   public_subnet  = module.networking.public_subnet
+  elb            = module.loadbalancing.elb
+  alb_tg         = module.loadbalancing.alb_tg
   key_name       = "project"
+}
+
+module "loadbalancing" {
+  source         = "./loadbalancing"
+  private_subnet = module.networking.private_subnet
+  vpc_id         = module.networking.vpc_id
+  web_sg         = module.networking.web_sg
 }
