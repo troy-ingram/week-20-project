@@ -7,7 +7,3 @@
 variable "access_ip" {
   type = string
 }
-
-variable "ACCESS_KEY" {}
-variable "SECRET_ACCESS_KEY" {}
-variable "REGION" {}
