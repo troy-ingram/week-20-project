@@ -1,5 +1,5 @@
 # --- root/outputs.tf ---
 
-# output "public_az" {
-#     value = 
-# }
+output "alb_dns" {
+    value = module.loadbalancing.alb_dns
+}
