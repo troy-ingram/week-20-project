@@ -22,7 +22,6 @@ resource "aws_launch_template" "project_bastion" {
   instance_type          = var.bastion_instance_type
   vpc_security_group_ids = [var.public_sg]
   key_name               = var.key_name
-  user_data = filebase64("./compute/install_apache.sh")
 
   tags = {
     Name = "project_bastion"
@@ -48,6 +47,7 @@ resource "aws_launch_template" "project_database" {
   instance_type          = var.database_instance_type
   vpc_security_group_ids = [var.private_sg]
   key_name               = var.key_name
+  user_data              = filebase64("install_apache.sh")
 
   tags = {
     Name = "project_database"

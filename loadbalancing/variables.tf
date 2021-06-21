@@ -1,8 +1,9 @@
 # --- loadbalancing/variables.tf ---
 
-variable "private_subnet" {}
+variable "public_subnet" {}
 variable "vpc_id" {}
 variable "web_sg" {}
+variable "database_asg" {}
 
 
 

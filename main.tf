@@ -21,7 +21,8 @@ module "compute" {
 
 module "loadbalancing" {
   source         = "./loadbalancing"
-  private_subnet = module.networking.private_subnet
+  public_subnet = module.networking.public_subnet
   vpc_id         = module.networking.vpc_id
   web_sg         = module.networking.web_sg
+  database_asg   = module.compute.database_asg
 }

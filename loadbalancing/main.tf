@@ -5,7 +5,11 @@ resource "aws_lb" "project_lb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [var.web_sg]
-  subnets            = tolist(var.private_subnet)
+  subnets            = tolist(var.public_subnet)
+
+  depends_on = [
+    var.database_asg
+  ]
 }
 
 resource "aws_lb_target_group" "project_tg" {
